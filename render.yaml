@@ -1,0 +1,30 @@
+# Render Blueprint for the Conveyor backend (API + worker).
+# Frontend is deployed separately on Vercel; the database on Neon.
+# Secrets marked `sync: false` are set in the Render dashboard, not committed.
+services:
+  - type: web
+    name: conveyor-backend
+    runtime: docker
+    plan: free
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /healthz
+    envVars:
+      - key: DATABASE_URL          # Neon connection string (sslmode=require)
+        sync: false
+      - key: SESSION_SECRET        # auto-generated, kept by Render
+        generateValue: true
+      - key: GITHUB_CLIENT_ID      # from the production GitHub OAuth app
+        sync: false
+      - key: GITHUB_CLIENT_SECRET
+        sync: false
+      - key: GITHUB_CALLBACK_URL   # https://<this-service>.onrender.com/api/auth/github/callback
+        sync: false
+      - key: FRONTEND_URL          # https://<your-app>.vercel.app
+        sync: false
+      - key: CORS_ALLOWED_ORIGINS  # https://<your-app>.vercel.app
+        sync: false
+      - key: ALLOW_DEV_LOGIN
+        value: "false"
+      - key: WORKER_CONCURRENCY
+        value: "2"
