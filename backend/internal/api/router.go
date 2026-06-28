@@ -30,13 +30,22 @@ func NewRouter(pool *pgxpool.Pool, queries *sqlc.Queries, authsvc *auth.Service)
 	r.Get("/healthz", healthz(pool))
 	authsvc.Mount(r)
 
-	// Authenticated project routes, scoped to the logged-in user.
+	// Authenticated routes, scoped to the logged-in user.
 	ph := &projectHandlers{q: queries}
+	bh := &buildHandlers{q: queries}
 	r.Group(func(r chi.Router) {
 		r.Use(auth.RequireAuth)
+
 		r.Post("/api/projects", ph.create)
 		r.Get("/api/projects", ph.list)
 		r.Get("/api/projects/{id}", ph.get)
+
+		r.Post("/api/projects/{id}/builds", bh.trigger)
+		r.Get("/api/projects/{id}/builds", bh.listForProject)
+
+		r.Get("/api/builds/{id}", bh.get)
+		r.Get("/api/builds/{id}/logs", bh.logs)
+		r.Post("/api/builds/{id}/cancel", bh.cancel)
 	})
 
 	return r

@@ -11,11 +11,16 @@ import (
 )
 
 type Querier interface {
+	CreateBuildJob(ctx context.Context, arg CreateBuildJobParams) (BuildJob, error)
 	CreateProject(ctx context.Context, arg CreateProjectParams) (Project, error)
+	GetBuildJobForOwner(ctx context.Context, arg GetBuildJobForOwnerParams) (BuildJob, error)
+	GetBuildLogsForOwner(ctx context.Context, arg GetBuildLogsForOwnerParams) ([]BuildLog, error)
 	GetProjectForOwner(ctx context.Context, arg GetProjectForOwnerParams) (Project, error)
 	GetUserByGithubID(ctx context.Context, githubID int64) (User, error)
 	GetUserByID(ctx context.Context, id uuid.UUID) (User, error)
+	ListBuildJobsForProject(ctx context.Context, arg ListBuildJobsForProjectParams) ([]BuildJob, error)
 	ListProjectsByOwner(ctx context.Context, ownerID uuid.UUID) ([]Project, error)
+	RequestCancelForOwner(ctx context.Context, arg RequestCancelForOwnerParams) (int64, error)
 	UpsertUserByGithubID(ctx context.Context, arg UpsertUserByGithubIDParams) (User, error)
 }
 
