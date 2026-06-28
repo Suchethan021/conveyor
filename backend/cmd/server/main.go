@@ -44,7 +44,7 @@ func main() {
 
 	srv := &http.Server{
 		Addr:              ":" + cfg.Port,
-		Handler:           api.NewRouter(pool, queries, authsvc),
+		Handler:           api.NewRouter(pool, queries, authsvc, cfg.CORSAllowedOrigins),
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 

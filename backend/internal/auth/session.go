@@ -37,6 +37,15 @@ func (m *SessionManager) sign(msg string) string {
 	return hex.EncodeToString(mac.Sum(nil))
 }
 
+// SameSite returns the cookie policy: None for HTTPS (so the cookie works
+// cross-site when the frontend is on another domain), Lax otherwise.
+func (m *SessionManager) SameSite() http.SameSite {
+	if m.secure {
+		return http.SameSiteNoneMode
+	}
+	return http.SameSiteLaxMode
+}
+
 // Issue sets a signed session cookie for the given user.
 func (m *SessionManager) Issue(w http.ResponseWriter, userID uuid.UUID) {
 	exp := time.Now().Add(sessionMaxAge).Unix()
@@ -50,7 +59,7 @@ func (m *SessionManager) Issue(w http.ResponseWriter, userID uuid.UUID) {
 		Path:     "/",
 		HttpOnly: true,
 		Secure:   m.secure,
-		SameSite: http.SameSiteLaxMode,
+		SameSite: m.SameSite(),
 		Expires:  time.Unix(exp, 0),
 		MaxAge:   int(sessionMaxAge.Seconds()),
 	})
@@ -64,7 +73,7 @@ func (m *SessionManager) Clear(w http.ResponseWriter) {
 		Path:     "/",
 		HttpOnly: true,
 		Secure:   m.secure,
-		SameSite: http.SameSiteLaxMode,
+		SameSite: m.SameSite(),
 		MaxAge:   -1,
 	})
 }

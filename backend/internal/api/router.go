@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/Suchethan021/conveyor/backend/internal/auth"
@@ -15,13 +16,23 @@ import (
 )
 
 // NewRouter builds the HTTP handler tree with the standard middleware stack
-// and mounts the auth and project routes.
-func NewRouter(pool *pgxpool.Pool, queries *sqlc.Queries, authsvc *auth.Service) http.Handler {
+// and mounts the auth and project routes. corsOrigins are the browser origins
+// allowed to call the API with credentials (for split-domain deploys).
+func NewRouter(pool *pgxpool.Pool, queries *sqlc.Queries, authsvc *auth.Service, corsOrigins []string) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
+
+	// Allow the configured frontend origin(s) to call the API with cookies.
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   corsOrigins,
+		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
+		AllowedHeaders:   []string{"Content-Type"},
+		AllowCredentials: true,
+		MaxAge:           300,
+	}))
 
 	// Populate user context from the session cookie on every request.
 	r.Use(authsvc.Authenticator)

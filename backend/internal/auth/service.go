@@ -105,7 +105,7 @@ func (s *Service) handleGitHubLogin(w http.ResponseWriter, r *http.Request) {
 		Path:     "/",
 		HttpOnly: true,
 		Secure:   s.secure,
-		SameSite: http.SameSiteLaxMode,
+		SameSite: s.sessions.SameSite(),
 		MaxAge:   600,
 	})
 	http.Redirect(w, r, s.oauth.AuthCodeURL(state), http.StatusTemporaryRedirect)
