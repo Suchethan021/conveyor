@@ -10,6 +10,15 @@ and a worker concurrency limit. Secrets are masked out of logs before they're st
 
 > Architecture deep-dive: [ARCHITECTURE.md](./ARCHITECTURE.md) · Product spec: [SPEC.md](./SPEC.md)
 
+## Live demo
+
+**▶ https://conveyor-neon.vercel.app** — sign in with GitHub and try it.
+
+> Hosted on free tiers: frontend on **Vercel**, backend (API + worker) on **Render**, database on
+> **Neon**. The Render instance sleeps when idle, so the **first request may take ~30–50s to wake**.
+> The deployed build uses real GitHub login only (the local dev-login shortcut is disabled).
+> Prefer to run it yourself? See [Quick start](#quick-start-docker) below.
+
 ## Stack
 
 | Layer    | Technology                                          |
