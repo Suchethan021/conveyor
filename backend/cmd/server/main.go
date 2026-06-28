@@ -11,8 +11,10 @@ import (
 	"time"
 
 	"github.com/Suchethan021/conveyor/backend/internal/api"
+	"github.com/Suchethan021/conveyor/backend/internal/auth"
 	"github.com/Suchethan021/conveyor/backend/internal/config"
 	"github.com/Suchethan021/conveyor/backend/internal/db"
+	"github.com/Suchethan021/conveyor/backend/internal/db/sqlc"
 )
 
 func main() {
@@ -29,9 +31,19 @@ func main() {
 	defer pool.Close()
 	log.Println("connected to database")
 
+	queries := sqlc.New(pool)
+
+	authsvc, err := auth.NewService(cfg, queries)
+	if err != nil {
+		log.Fatalf("auth: %v", err)
+	}
+	if !authsvc.OAuthEnabled() {
+		log.Println("warning: GitHub OAuth not configured (set GITHUB_CLIENT_ID/SECRET); login routes will return 503")
+	}
+
 	srv := &http.Server{
 		Addr:              ":" + cfg.Port,
-		Handler:           api.NewRouter(pool),
+		Handler:           api.NewRouter(pool, authsvc),
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 

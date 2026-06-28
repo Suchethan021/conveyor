@@ -9,10 +9,13 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/jackc/pgx/v5/pgxpool"
+
+	"github.com/Suchethan021/conveyor/backend/internal/auth"
 )
 
-// NewRouter builds the HTTP handler tree with the standard middleware stack.
-func NewRouter(pool *pgxpool.Pool) http.Handler {
+// NewRouter builds the HTTP handler tree with the standard middleware stack
+// and mounts the auth routes.
+func NewRouter(pool *pgxpool.Pool, authsvc *auth.Service) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
@@ -20,7 +23,11 @@ func NewRouter(pool *pgxpool.Pool) http.Handler {
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(30 * time.Second))
 
+	// Populate user context from the session cookie on every request.
+	r.Use(authsvc.Authenticator)
+
 	r.Get("/healthz", healthz(pool))
+	authsvc.Mount(r)
 
 	return r
 }
