@@ -35,16 +35,9 @@ services:
         condition: service_healthy
       migrate:
         condition: service_completed_successfully
-    environment:
-      DATABASE_URL: postgres://${POSTGRES_USER:-conveyor}:${POSTGRES_PASSWORD:-conveyor}@db:5432/${POSTGRES_DB:-conveyor}?sslmode=disable
-      PORT: "8080"
-      WORKER_CONCURRENCY: "2"
-      SESSION_SECRET: ${SESSION_SECRET:-dev-only-insecure-session-secret-change-me}
-      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
-      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
-      GITHUB_CALLBACK_URL: ${GITHUB_CALLBACK_URL:-http://localhost:8080/api/auth/github/callback}
-      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
-      ALLOW_DEV_LOGIN: ${ALLOW_DEV_LOGIN:-true}
+    # Backend owns its config: copy backend/.env.example -> backend/.env
+    env_file:
+      - ./backend/.env
     ports:
       - "8080:8080"
 

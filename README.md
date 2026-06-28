@@ -27,9 +27,13 @@ Requires only **Docker** (with Compose).
 ```bash
 git clone https://github.com/Suchethan021/conveyor
 cd conveyor
-cp .env.example .env     # the defaults work out of the box for local use
+cp backend/.env.example backend/.env      # backend config & secrets
+cp frontend/.env.example frontend/.env    # frontend config (defaults are fine)
 docker compose up --build
 ```
+
+The committed example values work out of the box for local use. The database runs with
+built-in throwaway credentials, so no extra setup is needed.
 
 This starts four things in order: Postgres → migrations → the Go backend (API + worker) →
 the React frontend.
@@ -58,25 +62,36 @@ docker compose down -v
 
 ## Configuration
 
-All configuration is via environment variables (nothing is hardcoded). Copy `.env.example`
-to `.env` and adjust. The committed defaults are **local-only and throwaway** — real secrets
-never live in the repo.
+Configuration is via environment variables (nothing is hardcoded). Each service owns its own
+env file — copy the `.env.example` next to each one. Real secrets live in the gitignored
+`.env` files, never in the repo; the committed examples are placeholders / local-only.
+
+**`backend/.env`** — the Go API + worker:
 
 | Variable | Purpose | Local default |
 | --- | --- | --- |
-| `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` | Local Postgres container | `conveyor` |
-| `SESSION_SECRET` | HMAC key for signing session cookies | insecure dev value |
+| `DATABASE_URL` | Postgres connection (host `db` in compose) | `postgres://conveyor:conveyor@db:5432/conveyor` |
+| `SESSION_SECRET` | HMAC key for signing session cookies | dev value (replace it) |
 | `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` | GitHub OAuth app (optional) | blank |
 | `GITHUB_CALLBACK_URL` | OAuth callback | `http://localhost:8080/api/auth/github/callback` |
 | `FRONTEND_URL` | Post-login redirect target | `http://localhost:3000` |
 | `ALLOW_DEV_LOGIN` | Enables the local dev-login shortcut | `true` |
 | `WORKER_CONCURRENCY` | Number of worker goroutines | `2` |
 
+**`frontend/.env`** — the SPA:
+
+| Variable | Purpose | Local default |
+| --- | --- | --- |
+| `VITE_API_URL` | Backend base URL; blank = same-origin via proxy | blank |
+
+The Postgres container itself uses built-in local credentials (`conveyor`/`conveyor`) defined
+in `docker-compose.yml` — fine for local, since that database is ephemeral and not exposed.
+
 ### Enabling real GitHub login (optional)
 1. Register an OAuth app at <https://github.com/settings/developers>:
    - **Homepage URL:** `http://localhost:3000`
    - **Authorization callback URL:** `http://localhost:8080/api/auth/github/callback`
-2. Put the Client ID and Secret in your `.env` (`GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`).
+2. Put the Client ID and Secret in `backend/.env` (`GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`).
 3. `docker compose up --build` and use **Continue with GitHub**.
 
 Without these, login routes return `503` and you use **Dev login** instead.
@@ -91,7 +106,7 @@ cd frontend && npm install && npm run dev   # http://localhost:5173
 ```
 
 Vite proxies `/api` to the backend, so cookies work the same as in production.
-(For real GitHub login in this mode, set `FRONTEND_URL=http://localhost:5173`.)
+(For real GitHub login in this mode, set `FRONTEND_URL=http://localhost:5173` in `backend/.env`.)
 
 Regenerate type-safe DB code after changing SQL (no local toolchain needed):
 
