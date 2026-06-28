@@ -25,6 +25,7 @@ type Service struct {
 	queries     *sqlc.Queries
 	frontendURL string
 	secure      bool
+	devLogin    bool
 }
 
 // NewService constructs the auth service. SESSION_SECRET is required; GitHub
@@ -46,6 +47,7 @@ func NewService(cfg *config.Config, queries *sqlc.Queries) (*Service, error) {
 		queries:     queries,
 		frontendURL: cfg.FrontendURL,
 		secure:      secure,
+		devLogin:    cfg.AllowDevLogin,
 	}, nil
 }
 
@@ -58,8 +60,33 @@ func (s *Service) Mount(r chi.Router) {
 		r.Get("/github/login", s.handleGitHubLogin)
 		r.Get("/github/callback", s.handleGitHubCallback)
 		r.Post("/logout", s.handleLogout)
+		if s.devLogin {
+			r.Post("/dev-login", s.handleDevLogin)
+		}
 	})
 	r.With(RequireAuth).Get("/api/me", s.handleMe)
+}
+
+// handleDevLogin issues a session for a fixed local test user. Only mounted
+// when ALLOW_DEV_LOGIN=true; never enable in a real deployment.
+func (s *Service) handleDevLogin(w http.ResponseWriter, r *http.Request) {
+	user, err := s.queries.UpsertUserByGithubID(r.Context(), sqlc.UpsertUserByGithubIDParams{
+		GithubID:  -1,
+		Username:  "devuser",
+		Email:     text("dev@example.com"),
+		AvatarUrl: pgtype.Text{},
+	})
+	if err != nil {
+		httpx.Error(w, http.StatusInternalServerError, "db_error", "could not create dev user")
+		return
+	}
+	s.sessions.Issue(w, user.ID)
+	httpx.JSON(w, http.StatusOK, meResponse{
+		ID:       user.ID.String(),
+		GithubID: user.GithubID,
+		Username: user.Username,
+		Email:    user.Email.String,
+	})
 }
 
 func (s *Service) handleGitHubLogin(w http.ResponseWriter, r *http.Request) {

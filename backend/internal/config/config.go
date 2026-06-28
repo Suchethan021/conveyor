@@ -20,6 +20,10 @@ type Config struct {
 	GitHubClientSecret string
 	GitHubCallbackURL  string
 	FrontendURL        string
+
+	// AllowDevLogin enables a local-only login shortcut for testing without
+	// GitHub. Must be false in any real deployment.
+	AllowDevLogin bool
 }
 
 // Load reads and validates configuration from environment variables.
@@ -34,6 +38,7 @@ func Load() (*Config, error) {
 		GitHubClientSecret: os.Getenv("GITHUB_CLIENT_SECRET"),
 		GitHubCallbackURL:  getenv("GITHUB_CALLBACK_URL", "http://localhost:8080/api/auth/github/callback"),
 		FrontendURL:        getenv("FRONTEND_URL", "http://localhost:5173"),
+		AllowDevLogin:      os.Getenv("ALLOW_DEV_LOGIN") == "true",
 	}
 
 	if c.DatabaseURL == "" {
