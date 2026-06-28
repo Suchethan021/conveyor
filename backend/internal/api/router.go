@@ -11,11 +11,12 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/Suchethan021/conveyor/backend/internal/auth"
+	"github.com/Suchethan021/conveyor/backend/internal/db/sqlc"
 )
 
 // NewRouter builds the HTTP handler tree with the standard middleware stack
-// and mounts the auth routes.
-func NewRouter(pool *pgxpool.Pool, authsvc *auth.Service) http.Handler {
+// and mounts the auth and project routes.
+func NewRouter(pool *pgxpool.Pool, queries *sqlc.Queries, authsvc *auth.Service) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
@@ -28,6 +29,15 @@ func NewRouter(pool *pgxpool.Pool, authsvc *auth.Service) http.Handler {
 
 	r.Get("/healthz", healthz(pool))
 	authsvc.Mount(r)
+
+	// Authenticated project routes, scoped to the logged-in user.
+	ph := &projectHandlers{q: queries}
+	r.Group(func(r chi.Router) {
+		r.Use(auth.RequireAuth)
+		r.Post("/api/projects", ph.create)
+		r.Get("/api/projects", ph.list)
+		r.Get("/api/projects/{id}", ph.get)
+	})
 
 	return r
 }

@@ -11,8 +11,11 @@ import (
 )
 
 type Querier interface {
+	CreateProject(ctx context.Context, arg CreateProjectParams) (Project, error)
+	GetProjectForOwner(ctx context.Context, arg GetProjectForOwnerParams) (Project, error)
 	GetUserByGithubID(ctx context.Context, githubID int64) (User, error)
 	GetUserByID(ctx context.Context, id uuid.UUID) (User, error)
+	ListProjectsByOwner(ctx context.Context, ownerID uuid.UUID) ([]Project, error)
 	UpsertUserByGithubID(ctx context.Context, arg UpsertUserByGithubIDParams) (User, error)
 }
 
