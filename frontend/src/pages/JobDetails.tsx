@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, isActive, type BuildLog } from '../lib/api'
@@ -21,11 +22,23 @@ export function JobDetails() {
 
   const active = job.data ? isActive(job.data.status) : false
 
-  const logs = useQuery({
-    queryKey: ['build-logs', id],
-    queryFn: () => api.getBuildLogs(id),
-    refetchInterval: active ? 1500 : false,
-  })
+  // Live logs over Server-Sent Events: the stream sends all existing lines,
+  // then tails new ones, and emits a "done" event when the job finishes.
+  const [logs, setLogs] = useState<BuildLog[]>([])
+  useEffect(() => {
+    setLogs([])
+    const es = new EventSource(`/api/builds/${id}/logs/stream`)
+    es.onmessage = (e) => {
+      const line = JSON.parse(e.data) as BuildLog
+      setLogs((prev) => [...prev, line])
+    }
+    es.addEventListener('done', () => {
+      es.close()
+      qc.invalidateQueries({ queryKey: ['build', id] })
+    })
+    es.onerror = () => es.close()
+    return () => es.close()
+  }, [id, qc])
 
   const cancel = useMutation({
     mutationFn: () => api.cancelBuild(id),
@@ -76,10 +89,8 @@ export function JobDetails() {
 
       <h2 className="mt-8 text-lg font-semibold text-slate-900">Logs</h2>
       <div className="mt-3 max-h-[28rem] overflow-auto rounded-lg bg-slate-900 p-4 font-mono text-xs leading-relaxed">
-        {logs.data && logs.data.length === 0 && (
-          <p className="text-slate-500">Waiting for output…</p>
-        )}
-        {logs.data?.map((line: BuildLog) => (
+        {logs.length === 0 && <p className="text-slate-500">Waiting for output…</p>}
+        {logs.map((line: BuildLog) => (
           <div key={line.id} className="whitespace-pre-wrap">
             <span className="text-slate-500">
               {new Date(line.created_at).toLocaleTimeString()}{' '}
