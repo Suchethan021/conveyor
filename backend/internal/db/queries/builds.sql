@@ -21,6 +21,13 @@ JOIN projects p ON p.id = bj.project_id
 WHERE bl.job_id = $1 AND p.owner_id = $2
 ORDER BY bl.id ASC;
 
+-- name: GetBuildLogsAfterForOwner :many
+SELECT bl.* FROM build_logs bl
+JOIN build_jobs bj ON bj.id = bl.job_id
+JOIN projects p ON p.id = bj.project_id
+WHERE bl.job_id = $1 AND p.owner_id = $2 AND bl.id > $3
+ORDER BY bl.id ASC;
+
 -- name: RequestCancelForOwner :execrows
 UPDATE build_jobs
 SET cancel_requested = true, updated_at = now()

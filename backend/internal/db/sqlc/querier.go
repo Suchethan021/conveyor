@@ -19,6 +19,7 @@ type Querier interface {
 	CreateBuildJob(ctx context.Context, arg CreateBuildJobParams) (BuildJob, error)
 	CreateProject(ctx context.Context, arg CreateProjectParams) (Project, error)
 	GetBuildJobForOwner(ctx context.Context, arg GetBuildJobForOwnerParams) (BuildJob, error)
+	GetBuildLogsAfterForOwner(ctx context.Context, arg GetBuildLogsAfterForOwnerParams) ([]BuildLog, error)
 	GetBuildLogsForOwner(ctx context.Context, arg GetBuildLogsForOwnerParams) ([]BuildLog, error)
 	GetProjectByID(ctx context.Context, id uuid.UUID) (Project, error)
 	GetProjectForOwner(ctx context.Context, arg GetProjectForOwnerParams) (Project, error)

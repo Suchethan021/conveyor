@@ -76,6 +76,47 @@ func (q *Queries) GetBuildJobForOwner(ctx context.Context, arg GetBuildJobForOwn
 	return i, err
 }
 
+const getBuildLogsAfterForOwner = `-- name: GetBuildLogsAfterForOwner :many
+SELECT bl.id, bl.job_id, bl.stage, bl.level, bl.message, bl.created_at FROM build_logs bl
+JOIN build_jobs bj ON bj.id = bl.job_id
+JOIN projects p ON p.id = bj.project_id
+WHERE bl.job_id = $1 AND p.owner_id = $2 AND bl.id > $3
+ORDER BY bl.id ASC
+`
+
+type GetBuildLogsAfterForOwnerParams struct {
+	JobID   uuid.UUID `json:"job_id"`
+	OwnerID uuid.UUID `json:"owner_id"`
+	ID      int64     `json:"id"`
+}
+
+func (q *Queries) GetBuildLogsAfterForOwner(ctx context.Context, arg GetBuildLogsAfterForOwnerParams) ([]BuildLog, error) {
+	rows, err := q.db.Query(ctx, getBuildLogsAfterForOwner, arg.JobID, arg.OwnerID, arg.ID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []BuildLog{}
+	for rows.Next() {
+		var i BuildLog
+		if err := rows.Scan(
+			&i.ID,
+			&i.JobID,
+			&i.Stage,
+			&i.Level,
+			&i.Message,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getBuildLogsForOwner = `-- name: GetBuildLogsForOwner :many
 SELECT bl.id, bl.job_id, bl.stage, bl.level, bl.message, bl.created_at FROM build_logs bl
 JOIN build_jobs bj ON bj.id = bl.job_id

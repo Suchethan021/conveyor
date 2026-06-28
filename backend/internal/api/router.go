@@ -22,7 +22,6 @@ func NewRouter(pool *pgxpool.Pool, queries *sqlc.Queries, authsvc *auth.Service)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
-	r.Use(middleware.Timeout(30 * time.Second))
 
 	// Populate user context from the session cookie on every request.
 	r.Use(authsvc.Authenticator)
@@ -45,6 +44,7 @@ func NewRouter(pool *pgxpool.Pool, queries *sqlc.Queries, authsvc *auth.Service)
 
 		r.Get("/api/builds/{id}", bh.get)
 		r.Get("/api/builds/{id}/logs", bh.logs)
+		r.Get("/api/builds/{id}/logs/stream", bh.stream)
 		r.Post("/api/builds/{id}/cancel", bh.cancel)
 	})
 
