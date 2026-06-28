@@ -5,8 +5,10 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-conveyor}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-conveyor}
       POSTGRES_DB: ${POSTGRES_DB:-conveyor}
+    # Host 5433 -> container 5432, to avoid clashing with a local Postgres on 5432.
+    # (The app itself reaches the DB over the internal network as db:5432.)
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - dbdata:/var/lib/postgresql/data
     healthcheck:
