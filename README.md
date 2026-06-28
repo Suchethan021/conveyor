@@ -90,9 +90,14 @@ in `docker-compose.yml` — fine for local, since that database is ephemeral and
 ### Enabling real GitHub login (optional)
 1. Register an OAuth app at <https://github.com/settings/developers>:
    - **Homepage URL:** `http://localhost:3000`
-   - **Authorization callback URL:** `http://localhost:8080/api/auth/github/callback`
-2. Put the Client ID and Secret in `backend/.env` (`GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`).
+   - **Authorization callback URL:** `http://localhost:3000/api/auth/github/callback`
+     (the callback goes through the frontend so the whole flow stays on one origin and the
+     session cookie is set correctly; nginx proxies `/api` to the backend.)
+2. Put the Client ID and Secret in `backend/.env` (`GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`),
+   and set `GITHUB_CALLBACK_URL=http://localhost:3000/api/auth/github/callback`.
 3. `docker compose up --build` and use **Continue with GitHub**.
+
+(For the Vite dev server instead, use `http://localhost:5173/...` in both places.)
 
 Without these, login routes return `503` and you use **Dev login** instead.
 
