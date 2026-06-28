@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { api, isActive, type BuildLog } from '../lib/api'
+import { api, API_BASE, isActive, type BuildLog } from '../lib/api'
 import { StatusBadge } from '../components/StatusBadge'
 
 const levelColor: Record<string, string> = {
@@ -27,7 +27,7 @@ export function JobDetails() {
   const [logs, setLogs] = useState<BuildLog[]>([])
   useEffect(() => {
     setLogs([])
-    const es = new EventSource(`/api/builds/${id}/logs/stream`)
+    const es = new EventSource(`${API_BASE}/api/builds/${id}/logs/stream`)
     es.onmessage = (e) => {
       const line = JSON.parse(e.data) as BuildLog
       setLogs((prev) => [...prev, line])

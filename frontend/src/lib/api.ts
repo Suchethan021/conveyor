@@ -60,8 +60,11 @@ export class ApiError extends Error {
   }
 }
 
+// Base URL for the backend. Empty by default → same-origin via the proxy.
+export const API_BASE = import.meta.env.VITE_API_URL ?? ''
+
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const res = await fetch(`/api${path}`, {
+  const res = await fetch(`${API_BASE}/api${path}`, {
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     ...options,
