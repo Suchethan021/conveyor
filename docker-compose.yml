@@ -1,0 +1,46 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-conveyor}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-conveyor}
+      POSTGRES_DB: ${POSTGRES_DB:-conveyor}
+    ports:
+      - "5432:5432"
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-conveyor}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Runs golang-migrate once against the db, then exits.
+  migrate:
+    image: migrate/migrate:v4.17.1
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend/db/migrations:/migrations
+    command:
+      - "-path=/migrations"
+      - "-database=postgres://${POSTGRES_USER:-conveyor}:${POSTGRES_PASSWORD:-conveyor}@db:5432/${POSTGRES_DB:-conveyor}?sslmode=disable"
+      - "up"
+
+  backend:
+    build: ./backend
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-conveyor}:${POSTGRES_PASSWORD:-conveyor}@db:5432/${POSTGRES_DB:-conveyor}?sslmode=disable
+      PORT: "8080"
+      WORKER_CONCURRENCY: "2"
+    ports:
+      - "8080:8080"
+
+volumes:
+  dbdata:

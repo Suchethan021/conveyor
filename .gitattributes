@@ -1,0 +1,8 @@
+# Normalize line endings to LF so files behave identically in Linux containers.
+* text=auto eol=lf
+
+# Binary files Git should not touch.
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary
