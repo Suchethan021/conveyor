@@ -191,6 +191,11 @@ production-shaped:
 - **Crash safety (roadmap):** a reaper requeues jobs whose `locked_by` is stale (worker
   died mid-build) past a heartbeat timeout.
 
+**Simulating outcomes (demo aid):** stages are timed sleeps. To demo the failure/retry
+path deterministically, a build whose project **branch name contains `fail`** fails at the
+scan stage; every other branch succeeds. The worker also emits one log line containing a
+fake `ghp_…` token to show that `internal/logsec` masks secrets before they are stored.
+
 ## 6. Authentication Flow
 
 GitHub OAuth (Authorization Code):

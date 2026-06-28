@@ -15,6 +15,7 @@ import (
 	"github.com/Suchethan021/conveyor/backend/internal/config"
 	"github.com/Suchethan021/conveyor/backend/internal/db"
 	"github.com/Suchethan021/conveyor/backend/internal/db/sqlc"
+	"github.com/Suchethan021/conveyor/backend/internal/worker"
 )
 
 func main() {
@@ -47,6 +48,16 @@ func main() {
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 
+	// Start the build worker pool. Its context is cancelled on shutdown so
+	// in-flight stages stop and the goroutines drain.
+	workerCtx, stopWorker := context.WithCancel(context.Background())
+	w := worker.New(queries, cfg.WorkerConcurrency)
+	workerDone := make(chan struct{})
+	go func() {
+		w.Run(workerCtx)
+		close(workerDone)
+	}()
+
 	// Serve in the background so we can wait for a shutdown signal.
 	go func() {
 		log.Printf("listening on :%s", cfg.Port)
@@ -65,4 +76,7 @@ func main() {
 	if err := srv.Shutdown(shutdownCtx); err != nil {
 		log.Printf("shutdown: %v", err)
 	}
+
+	stopWorker()
+	<-workerDone
 }

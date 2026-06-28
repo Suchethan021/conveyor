@@ -8,19 +8,31 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Querier interface {
+	AppendBuildLog(ctx context.Context, arg AppendBuildLogParams) error
+	// Atomically claim the oldest queued job. FOR UPDATE SKIP LOCKED lets multiple
+	// workers/replicas poll concurrently without ever grabbing the same row.
+	ClaimNextBuildJob(ctx context.Context, lockedBy pgtype.Text) (BuildJob, error)
 	CreateBuildJob(ctx context.Context, arg CreateBuildJobParams) (BuildJob, error)
 	CreateProject(ctx context.Context, arg CreateProjectParams) (Project, error)
 	GetBuildJobForOwner(ctx context.Context, arg GetBuildJobForOwnerParams) (BuildJob, error)
 	GetBuildLogsForOwner(ctx context.Context, arg GetBuildLogsForOwnerParams) ([]BuildLog, error)
+	GetProjectByID(ctx context.Context, id uuid.UUID) (Project, error)
 	GetProjectForOwner(ctx context.Context, arg GetProjectForOwnerParams) (Project, error)
 	GetUserByGithubID(ctx context.Context, githubID int64) (User, error)
 	GetUserByID(ctx context.Context, id uuid.UUID) (User, error)
+	IsCancelRequested(ctx context.Context, id uuid.UUID) (bool, error)
 	ListBuildJobsForProject(ctx context.Context, arg ListBuildJobsForProjectParams) ([]BuildJob, error)
 	ListProjectsByOwner(ctx context.Context, ownerID uuid.UUID) ([]Project, error)
+	MarkBuildJobCancelled(ctx context.Context, id uuid.UUID) error
+	MarkBuildJobFailed(ctx context.Context, arg MarkBuildJobFailedParams) error
+	MarkBuildJobSuccess(ctx context.Context, id uuid.UUID) error
 	RequestCancelForOwner(ctx context.Context, arg RequestCancelForOwnerParams) (int64, error)
+	RequeueBuildJob(ctx context.Context, id uuid.UUID) error
+	SetBuildJobStatus(ctx context.Context, arg SetBuildJobStatusParams) error
 	UpsertUserByGithubID(ctx context.Context, arg UpsertUserByGithubIDParams) (User, error)
 }
 
