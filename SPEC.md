@@ -55,7 +55,7 @@ _Roadmap / stretch:_
 
 ### Logs
 - Logs stored in PostgreSQL, shown on the job details page.
-- _Roadmap:_ live logs via SSE/WebSocket, per-line timestamps, secret/token masking.
+- Live logs via Server-Sent Events, per-line timestamps, and secret/token masking.
 
 ### UI Pages
 - Login

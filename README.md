@@ -118,6 +118,7 @@ logged-in user. Errors use a consistent envelope: `{"error": {"code", "message"}
 | GET  | `/api/projects/{id}/builds` | List a project's builds |
 | GET  | `/api/builds/{id}` | Build job status |
 | GET  | `/api/builds/{id}/logs` | Build logs |
+| GET  | `/api/builds/{id}/logs/stream` | Live logs via Server-Sent Events |
 | POST | `/api/builds/{id}/cancel` | Request cancellation |
 
 ## Project structure

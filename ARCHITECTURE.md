@@ -224,7 +224,7 @@ Google / GitLab are additional providers behind the same interface (roadmap).
 | GET    | `/api/builds/{id}`            | Build job status              |
 | GET    | `/api/builds/{id}/logs`       | Build logs (paginated)        |
 | POST   | `/api/builds/{id}/cancel`     | Request cancellation          |
-| GET    | `/api/builds/{id}/logs/stream`| Live logs via SSE (roadmap)   |
+| GET    | `/api/builds/{id}/logs/stream`| Live logs via Server-Sent Events |
 
 Responses use a consistent envelope and structured errors (`{ "error": { "code", "message" } }`)
 with appropriate HTTP status codes.
