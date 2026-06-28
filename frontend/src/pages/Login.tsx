@@ -21,6 +21,10 @@ export function Login() {
     },
   })
 
+  // Hidden in production builds (set VITE_ENABLE_DEV_LOGIN=false) so the deployed
+  // demo only offers real GitHub login.
+  const showDevLogin = import.meta.env.VITE_ENABLE_DEV_LOGIN !== 'false'
+
   return (
     <div className="grid min-h-screen place-items-center px-4">
       <div className="w-full max-w-sm rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
@@ -36,16 +40,20 @@ export function Login() {
           Continue with GitHub
         </a>
 
-        <button
-          onClick={() => devLogin.mutate()}
-          disabled={devLogin.isPending}
-          className="mt-3 w-full rounded-md border border-slate-300 px-4 py-2.5 font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
-        >
-          {devLogin.isPending ? 'Signing in…' : 'Dev login (local)'}
-        </button>
+        {showDevLogin && (
+          <>
+            <button
+              onClick={() => devLogin.mutate()}
+              disabled={devLogin.isPending}
+              className="mt-3 w-full rounded-md border border-slate-300 px-4 py-2.5 font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+            >
+              {devLogin.isPending ? 'Signing in…' : 'Dev login (local)'}
+            </button>
 
-        {devLogin.isError && (
-          <p className="mt-3 text-sm text-red-600">Dev login failed. Is the backend running?</p>
+            {devLogin.isError && (
+              <p className="mt-3 text-sm text-red-600">Dev login failed. Is the backend running?</p>
+            )}
+          </>
         )}
       </div>
     </div>

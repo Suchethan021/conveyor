@@ -27,7 +27,10 @@ export function JobDetails() {
   const [logs, setLogs] = useState<BuildLog[]>([])
   useEffect(() => {
     setLogs([])
-    const es = new EventSource(`${API_BASE}/api/builds/${id}/logs/stream`)
+    // withCredentials sends the session cookie when the API is on another origin.
+    const es = new EventSource(`${API_BASE}/api/builds/${id}/logs/stream`, {
+      withCredentials: true,
+    })
     es.onmessage = (e) => {
       const line = JSON.parse(e.data) as BuildLog
       setLogs((prev) => [...prev, line])
