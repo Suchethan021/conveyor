@@ -1,9 +1,6 @@
 # Private notes / assignment logistics — never push
 NOTES.private.md
 
-# Personal working notes / scratch responses — local only
-lab/
-
 # Environment / secrets
 .env
 .env.*
