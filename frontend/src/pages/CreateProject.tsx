@@ -9,7 +9,7 @@ const PROVIDERS = ['github', 'gitlab']
 
 const labelCls = 'block text-sm font-medium text-slate-700'
 const inputCls =
-  'mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none'
+  'mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100'
 
 export function CreateProject() {
   const navigate = useNavigate()
@@ -47,7 +47,7 @@ export function CreateProject() {
           e.preventDefault()
           create.mutate()
         }}
-        className="mt-6 grid gap-4 rounded-lg border border-slate-200 bg-white p-6"
+        className="mt-6 grid gap-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
       >
         <div>
           <label className={labelCls}>Project name</label>
@@ -112,7 +112,7 @@ export function CreateProject() {
           <button
             type="submit"
             disabled={create.isPending}
-            className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-700 disabled:opacity-50"
           >
             {create.isPending ? 'Creating…' : 'Create project'}
           </button>

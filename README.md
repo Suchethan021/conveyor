@@ -73,7 +73,7 @@ env file — copy the `.env.example` next to each one. Real secrets live in the 
 | `DATABASE_URL` | Postgres connection (host `db` in compose) | `postgres://conveyor:conveyor@db:5432/conveyor` |
 | `SESSION_SECRET` | HMAC key for signing session cookies | dev value (replace it) |
 | `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` | GitHub OAuth app (optional) | blank |
-| `GITHUB_CALLBACK_URL` | OAuth callback | `http://localhost:8080/api/auth/github/callback` |
+| `GITHUB_CALLBACK_URL` | OAuth callback (through the frontend origin) | `http://localhost:3000/api/auth/github/callback` |
 | `FRONTEND_URL` | Post-login redirect target | `http://localhost:3000` |
 | `ALLOW_DEV_LOGIN` | Enables the local dev-login shortcut | `true` |
 | `WORKER_CONCURRENCY` | Number of worker goroutines | `2` |

@@ -50,7 +50,7 @@ export function ProjectDetails() {
         <button
           onClick={() => trigger.mutate()}
           disabled={trigger.isPending}
-          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-700 disabled:opacity-50"
         >
           {trigger.isPending ? 'Starting…' : 'Build / Deploy'}
         </button>
@@ -68,7 +68,7 @@ export function ProjectDetails() {
           <li key={b.id}>
             <Link
               to={`/builds/${b.id}`}
-              className="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-3 hover:border-slate-300"
+              className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 transition hover:border-indigo-300 hover:shadow-sm"
             >
               <div className="flex items-center gap-3">
                 <StatusBadge status={b.status} />

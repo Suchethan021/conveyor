@@ -1,5 +1,5 @@
 const colors: Record<string, string> = {
-  queued: 'bg-slate-200 text-slate-700',
+  queued: 'bg-slate-100 text-slate-600',
   building: 'bg-blue-100 text-blue-700',
   scanning: 'bg-indigo-100 text-indigo-700',
   deploying: 'bg-violet-100 text-violet-700',
@@ -9,9 +9,10 @@ const colors: Record<string, string> = {
 }
 
 export function StatusBadge({ status }: { status: string }) {
-  const cls = colors[status] ?? 'bg-slate-200 text-slate-700'
+  const cls = colors[status] ?? 'bg-slate-100 text-slate-600'
   return (
-    <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${cls}`}>
+    <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${cls}`}>
+      <span className="h-1.5 w-1.5 rounded-full bg-current opacity-70" />
       {status}
     </span>
   )
